@@ -43,11 +43,11 @@ public class TestNPC implements TabExecutor {
         }
 
         if (type == MinionType.FIGHTER)
-            main.getMinionManager().addMinion(new FighterMinion(player));
+            main.getMinionManager().addMinion(player, new FighterMinion(player));
         else if (type == MinionType.WOODCUTTER)
-            main.getMinionManager().addMinion(new WoodcutterMinion(player));
+            main.getMinionManager().addMinion(player, new WoodcutterMinion(player));
         else if (type == MinionType.ARCHER)
-            main.getMinionManager().addMinion(new ArcherMinion(player));
+            main.getMinionManager().addMinion(player, new ArcherMinion(player));
         else
             player.sendMessage(colorize("&cMinion not implemented yet :("));
 

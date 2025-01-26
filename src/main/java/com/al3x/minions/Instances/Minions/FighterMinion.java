@@ -2,6 +2,7 @@ package com.al3x.minions.Instances.Minions;
 
 import com.al3x.minions.Enums.MinionType;
 import com.al3x.minions.Utils.IsMobType;
+import com.al3x.minions.Utils.ItemBuilder;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -57,6 +58,10 @@ public class FighterMinion extends Minion {
         super.updateEquipment(Equipment.EquipmentSlot.CHESTPLATE, new ItemStack(Material.LEATHER_CHESTPLATE));
         super.updateEquipment(Equipment.EquipmentSlot.LEGGINGS, new ItemStack(Material.LEATHER_LEGGINGS));
         super.updateEquipment(Equipment.EquipmentSlot.BOOTS, new ItemStack(Material.LEATHER_BOOTS));
+    }
+
+    public ItemStack getMenuItem() {
+        return new ItemBuilder(Material.NETHER_STAR).setName("&6Fighter Minion").setLore("&7Level: &e" + getLevel()).build();
     }
 
     public int getDamage() {

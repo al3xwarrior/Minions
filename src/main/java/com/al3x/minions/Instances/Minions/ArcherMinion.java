@@ -2,6 +2,7 @@ package com.al3x.minions.Instances.Minions;
 
 import com.al3x.minions.Enums.MinionType;
 import com.al3x.minions.Utils.IsMobType;
+import com.al3x.minions.Utils.ItemBuilder;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

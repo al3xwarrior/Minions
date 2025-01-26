@@ -1,6 +1,7 @@
 package com.al3x.minions.Instances.Minions;
 
 import com.al3x.minions.Enums.MinionType;
+import com.al3x.minions.Utils.ItemBuilder;
 import com.al3x.minions.Utils.RayCastUtility;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.Navigator;
@@ -9,6 +10,9 @@ import net.citizensnpcs.api.trait.trait.Equipment;
 import net.citizensnpcs.trait.HologramTrait;
 import net.citizensnpcs.trait.SkinTrait;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -31,6 +35,8 @@ public class Minion {
     private boolean dead;
 
     // Type Specific Data
+    private ItemStack menuItem;
+    private ItemStack physicalItem;
     private boolean needsToSeeTarget;
 
     // Citizens Data
@@ -55,7 +61,11 @@ public class Minion {
         npc.getOrAddTrait(HologramTrait.class).addLine(colorize("&e" + name));
         npc.getOrAddTrait(HologramTrait.class).addLine(colorize("&7Level: &e" + level));
 
-        npc.spawn(owner.getLocation());
+        Location location = owner.getLocation().clone().add(owner.getLocation().getDirection().normalize().multiply(-1.5));
+        location.setY(owner.getLocation().getY());
+        npc.spawn(location);
+
+        owner.getWorld().spawnParticle(Particle.CLOUD, location.clone().add(0, 0.2, 0), 10, 0.4, 0.4, 0.4, 0.1);
 
         LivingEntity livingEntity = (LivingEntity) npc.getEntity();
         livingEntity.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(0.45);
@@ -112,9 +122,36 @@ public class Minion {
         npc.getOrAddTrait(Equipment.class).set(slot, item);
     }
 
+    /**
+     * Destroy the citizens npc, delete it, and remove it from the registry
+     */
     public void destroy() {
+        Location location = owner.getLocation().clone().add(owner.getLocation().getDirection().normalize().multiply(-1.5));
+        location.setY(owner.getLocation().getY());
+        owner.getWorld().spawnParticle(Particle.CLOUD, location.clone().add(0, 0.2, 0), 10, 0.4, 0.4, 0.4, 0.1);
+
         npc.despawn();
         npc.destroy();
+    }
+
+    public ItemStack getMenuItem() {
+        return new ItemBuilder(Material.NETHER_STAR)
+                .setName("&6" + name)
+                .setLore(
+                        "&7Level: &e" + level +
+                        "\n&7Type: &a" + type +
+                        "\n\n&e&lCLICK to Un-Equip"
+                )
+                .build();
+    }
+    public ItemStack getPhysicalItem() {
+        return new ItemBuilder(Material.NETHER_STAR)
+                .setName("&6" + name)
+                .setLore("&7Level: &e" + level + "\n&7Type: &a" + type)
+                .setNBTString("minionUUID", uuid.toString())
+                .setNBTInt("minionLevel", level)
+                .setNBTString("minionType", type.toString())
+                .build();
     }
 
     public MinionType getType() {

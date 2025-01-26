@@ -5,3 +5,4 @@ depend: [Citizens]
 api-version: '1.21'
 commands:
   testnpc:
+  minions:
