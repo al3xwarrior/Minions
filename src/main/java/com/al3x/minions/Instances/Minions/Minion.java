@@ -1,0 +1,150 @@
+package com.al3x.minions.Instances.Minions;
+
+import com.al3x.minions.Enums.MinionType;
+import com.al3x.minions.Utils.RayCastUtility;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.ai.Navigator;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.trait.trait.Equipment;
+import net.citizensnpcs.trait.HologramTrait;
+import net.citizensnpcs.trait.SkinTrait;
+import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.UUID;
+
+import static com.al3x.minions.Utils.Color.colorize;
+
+public class Minion {
+
+    // Minion Data
+    private Player owner;
+    private String name;
+    private UUID uuid;
+    private int level;
+    private MinionType type;
+    private double reach;
+    private boolean dead;
+
+    // Type Specific Data
+    private boolean needsToSeeTarget;
+
+    // Citizens Data
+    private NPC npc;
+
+    public Minion(Player owner, String name, MinionType type) {
+        this.owner = owner;
+        this.name = name;
+        this.level = 1;
+        this.type = type;
+        this.uuid = UUID.randomUUID();
+        this.dead = false;
+        this.reach = 2.5;
+        needsToSeeTarget = false;
+
+        this.npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, colorize("&e" + name));
+        setupNPC();
+    }
+
+    private void setupNPC() {
+        npc.getOrAddTrait(SkinTrait.class).setSkinPersistent(owner);
+        npc.getOrAddTrait(HologramTrait.class).addLine(colorize("&e" + name));
+        npc.getOrAddTrait(HologramTrait.class).addLine(colorize("&7Level: &e" + level));
+
+        npc.spawn(owner.getLocation());
+
+        LivingEntity livingEntity = (LivingEntity) npc.getEntity();
+        livingEntity.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(0.45);
+        livingEntity.setCollidable(false);
+        livingEntity.setGravity(false);
+    }
+
+    /**
+     * Set the navigation point and run a task when the minion is close enough (based on their reach)
+     * @param location The Target Location (ex: block, entity, etc)
+     * @param closeEnough The task to run when the minion is close enough (ex: break block, hit entity, etc)
+     */
+    public void setGoal(Location location, Runnable closeEnough) {
+        npc.faceLocation(location);
+        npc.getEntity().setGravity(true);
+
+        Navigator navigator = npc.getNavigator();
+        if (npc.getEntity().getLocation().distance(location) < reach) {
+
+            // If the minion requires that it can SEE the target and doesnt
+            // due to something in its way, dont stop the navigation
+            // TODO: Doesnt work like at all
+            if (needsToSeeTarget) {
+                RayCastUtility.RayCastResult result = RayCastUtility.rayCastEntities((LivingEntity) npc.getEntity(), reach + 1, false, RayCastUtility.Precision.IMPRECISE_ENTITY);
+                if (result.isEmpty() || result.getType() == RayCastUtility.ResultType.EMPTY) {
+                    return;
+                }
+            }
+
+            if (navigator.isNavigating()) navigator.cancelNavigation();
+
+            closeEnough.run();
+            return;
+        }
+
+        if (!navigator.isNavigating() || navigator.isPaused()) {
+            navigator.setTarget(location);
+        }
+    }
+
+    public void updateLocation() {
+        if (getNPC().getNavigator().isNavigating()) getNPC().getNavigator().cancelNavigation();
+        npc.getEntity().setGravity(false);
+        Location location = owner.getLocation().clone().add(owner.getLocation().getDirection().normalize().multiply(-1.5));
+        location.setY(owner.getLocation().getY());
+        npc.getEntity().teleport(location);
+    }
+
+    public void updatePersonality() {
+        npc.setSneaking(owner.isSneaking());
+    }
+
+    public void updateEquipment(Equipment.EquipmentSlot slot, ItemStack item) {
+        npc.getOrAddTrait(Equipment.class).set(slot, item);
+    }
+
+    public void destroy() {
+        npc.despawn();
+        npc.destroy();
+    }
+
+    public MinionType getType() {
+        return type;
+    }
+    public Player getOwner() {
+        return owner;
+    }
+    public NPC getNPC() {
+        return npc;
+    }
+    public String getName() {
+        return name;
+    }
+    public UUID getUUID() {
+        return uuid;
+    }
+    public int getLevel() {
+        return level;
+    }
+    public void setLevel(int level) {
+        this.level = level;
+    }
+    public void setReach(double reach) {
+        this.reach = reach;
+    }
+    public boolean isNeedsToSeeTarget() {
+        return needsToSeeTarget;
+    }
+    public void setNeedsToSeeTarget(boolean needsToSeeTarget) {
+        this.needsToSeeTarget = needsToSeeTarget;
+    }
+}
