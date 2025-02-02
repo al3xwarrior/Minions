@@ -8,6 +8,7 @@ import com.al3x.minions.Instances.Minions.WoodcutterMinion;
 import com.al3x.minions.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,6 +64,7 @@ public class MinionManager {
         }
     }
 
+    @NotNull
     public Minion[] getUserEquippedMinions(Player player) {
         if (!minions.containsKey(player)) return new Minion[3];
         return minions.get(player);

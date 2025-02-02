@@ -1,7 +1,7 @@
 package com.al3x.minions.Instances.Minions;
 
+import com.al3x.minions.Enums.EntityTarget;
 import com.al3x.minions.Enums.MinionType;
-import com.al3x.minions.Utils.IsMobType;
 import com.al3x.minions.Utils.ItemBuilder;
 import net.citizensnpcs.api.trait.trait.Equipment;
 import org.bukkit.Material;
@@ -10,7 +10,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Collection;
+import static com.al3x.minions.Utils.MinionUtilities.*;
 
 public class FighterMinion extends Minion {
 
@@ -24,32 +24,12 @@ public class FighterMinion extends Minion {
 
     public void update() {
         super.updatePersonality();
-
-        // Get Entities in Chunk
-        Collection<Entity> entities = getOwner().getLocation().getNearbyEntities(7, 3, 7);
-
-        Entity closestEntity = null;
-        double closestDistance = 99;
-
-        for (Entity entity : entities) {
-            if (IsMobType.isFriendlyMob(entity) && !entity.isDead() && !entity.isInvisible()) {
-                double distance = entity.getLocation().distance(getNPC().getEntity().getLocation());
-                if (distance < closestDistance) {
-                    closestEntity = entity;
-                    closestDistance = distance;
-                }
-            }
-        }
-
-        if (closestEntity != null) {
-            LivingEntity finalClosestEntity = (LivingEntity) closestEntity;
-            super.setGoal(closestEntity.getLocation(), () -> {
-                ((LivingEntity) getNPC().getEntity()).swingMainHand();
-                finalClosestEntity.damage(damage);
-            });
-        } else {
+        Entity closestEntity = getClosestEntity(getOwner(), getRangeXZ(), getRangeY(), EntityTarget.ALL);
+        if (closestEntity == null) {
             super.updateLocation();
+            return;
         }
+        setGoal(closestEntity.getLocation(), () -> ((LivingEntity) closestEntity).damage(damage));
     }
 
     private void equipNPC() {

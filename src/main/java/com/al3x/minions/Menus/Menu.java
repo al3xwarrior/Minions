@@ -2,12 +2,14 @@ package com.al3x.minions.Menus;
 
 import com.al3x.minions.Instances.ClickableItem;
 import com.al3x.minions.Listeners.MenuListener;
+import com.al3x.minions.Utils.Color;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import static com.al3x.minions.Utils.Color.colorize;
+import static com.al3x.minions.Utils.Color.decolorize;
 
 public class Menu {
     private Player player;
@@ -27,7 +29,7 @@ public class Menu {
 
     public void setItem(int slot, ItemStack item) {
         inv.setItem(slot, item);
-        // TODO: something better than just null to prevent taking items from menu
+        // TODO: something better than just using null to prevent taking items from menu
         MenuListener.addItem(new ClickableItem(title, item, slot, null, null));
     }
     public void setItem(int slot, ItemStack item, Runnable leftClick) {

@@ -1,11 +1,15 @@
 package com.al3x.minions.Listeners;
 
 import com.al3x.minions.Instances.ClickableItem;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.ArrayList;
+
+import static com.al3x.minions.Utils.Color.colorize;
+import static com.al3x.minions.Utils.Color.decolorize;
 
 public class MenuListener implements Listener {
 
@@ -17,6 +21,7 @@ public class MenuListener implements Listener {
      * @param name
      */
     public static void addMenuName(String name) {
+        name = decolorize(colorize(name)); // dont ask
         for (String n : menuNames) {
             if (n.equals(name)) return;
         }
@@ -40,7 +45,7 @@ public class MenuListener implements Listener {
         if (e.getCurrentItem() == null) return;
 
         for (String name : menuNames) {
-            if (e.getView().getTitle().equals(name)) {
+            if (decolorize(e.getView().getTitle()).equals(name)) {
                 e.setCancelled(true);
                 break;
             }

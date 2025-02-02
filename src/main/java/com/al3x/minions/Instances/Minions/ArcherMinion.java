@@ -1,33 +1,26 @@
 package com.al3x.minions.Instances.Minions;
 
+import com.al3x.minions.Enums.EntityTarget;
 import com.al3x.minions.Enums.MinionType;
-import com.al3x.minions.Utils.IsMobType;
-import com.al3x.minions.Utils.ItemBuilder;
 import net.citizensnpcs.api.trait.trait.Equipment;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.Collection;
 
+import static com.al3x.minions.Utils.MinionUtilities.getClosestEntity;
+import static com.al3x.minions.Utils.MinionUtilities.isFriendlyMob;
+
 public class ArcherMinion extends Minion {
 
-    private int rangeXZ;
-    private int rangeY;
-    private int cooldown;
+    private final int cooldown;
     private int cooldownTimer = 0;
 
     public ArcherMinion(Player player) {
         super(player, "Archer Minion", MinionType.ARCHER);
         equipNPC();
-        this.rangeXZ = 12;
-        this.rangeY = 5;
         this.cooldown = 5;
 
         setReach(4.5);
@@ -36,36 +29,19 @@ public class ArcherMinion extends Minion {
 
     public void update() {
         super.updatePersonality();
-
-        // Get Entities in Chunk
-        Collection<Entity> entities = getOwner().getLocation().getNearbyEntities(rangeXZ, rangeY, rangeXZ);
-
-        Entity closestEntity = null;
-        double closestDistance = 99;
-
-        for (Entity entity : entities) {
-            if (IsMobType.isFriendlyMob(entity) && !entity.isDead() && !entity.isInvisible()) {
-                double distance = entity.getLocation().distance(getNPC().getEntity().getLocation());
-                if (distance < closestDistance) {
-                    closestEntity = entity;
-                    closestDistance = distance;
-                }
-            }
-        }
-
-        if (closestEntity != null) {
-            super.setGoal(closestEntity.getLocation(), () -> {
-                // Shoot arrow from npc
-                if (cooldownTimer <= 0) {
-                    cooldownTimer = cooldown;
-                    getNPC().getEntity().getWorld().spawnArrow(getNPC().getEntity().getLocation().clone().add(0, 0.6, 0), getNPC().getEntity().getLocation().getDirection(), 2.5f, 1.0f);
-                } else {
-                    cooldownTimer--;
-                }
-            });
-        } else {
+        Entity closestEntity = getClosestEntity(getOwner(), getRangeXZ(), getRangeY(), EntityTarget.MOBS);
+        if (closestEntity == null) {
             super.updateLocation();
+            return;
         }
+        setGoal(closestEntity.getLocation(), () -> {
+            if (cooldownTimer > 0) {
+                cooldownTimer--;
+                return;
+            }
+            getNPC().getEntity().getLocation().getWorld().spawnArrow(getNPC().getEntity().getLocation().add(0, 1.5, 0), closestEntity.getLocation().add(0, 1.5, 0).subtract(getNPC().getEntity().getLocation()).toVector(), 1.5f, 1);
+            cooldownTimer = cooldown;
+        });
     }
 
     private void equipNPC() {
