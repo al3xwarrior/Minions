@@ -1,5 +1,6 @@
 package com.al3x.minions.Utils;
 
+import de.tr7zw.nbtapi.NBT;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -49,18 +50,22 @@ public class ItemBuilder {
 
     public ItemStack build() {
         item.setItemMeta(meta);
-        NbtItemBuilder nbtItemBuilder = new NbtItemBuilder(item);
         for (String key : nbtData.keySet()) {
             Object value = nbtData.get(key);
             if (value instanceof Integer) {
-                nbtItemBuilder.setInt(key, (int) value);
+                NBT.modify(item, nbt -> {
+                    nbt.setInteger(key, (int) value);
+                });
             } else if (value instanceof String) {
-                nbtItemBuilder.setString(key, (String) value);
+                NBT.modify(item, nbt -> {
+                    nbt.setString(key, (String) value);
+                });
             } else if (value instanceof Boolean) {
-                nbtItemBuilder.setBoolean(key, (boolean) value);
+                NBT.modify(item, nbt -> {
+                    nbt.setBoolean(key, (boolean) value);
+                });
             }
         }
-        nbtItemBuilder.build();
         return item;
     }
 

@@ -1,7 +1,7 @@
 name: Minions
 version: '1.0'
 main: com.al3x.minions.Main
-depend: [Citizens]
+depend: [Citizens, NBTAPI]
 api-version: '1.21'
 commands:
   minions:
